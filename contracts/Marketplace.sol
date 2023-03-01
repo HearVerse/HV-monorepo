@@ -13,7 +13,6 @@ error NoZeroPrice();
 error NotOwner();
 error NotActived();
 error InvalidParam();
-error NotWhitelisted();
 error InvalidAmount();
 
 struct Listing {

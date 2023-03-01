@@ -1,18 +1,22 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-etherscan");
+require('dotenv').config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const Private_key = process.env.DEPLOY_PRIVATE_KEY;
+
 module.exports = {
-  defaultNetwork: "mumbai",
+  defaultNetwork: "hardhat",
   networks: {
     mumbai: {
-      url: "https://goerli.blockpi.network/v1/rpc/public",
-      accounts: [`0x${Private_key}`]
+      url: "https://rpc.ankr.com/polygon_mumbai",
+      accounts: [`0x${Private_key}`],
+      gas: "auto",
+      blockGasLimit: "auto",
     },
   },
   solidity: {
-    version: "0.8.17",
+    version: "0.8.9",
     settings: {
       optimizer: {
         enabled: true
