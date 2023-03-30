@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // This is the main building block for smart contracts.
 contract Token is ERC20 {
-    uint256 supply = 5_555_000 * 1e18;
+    uint256 supply = 5_555_000 * 1e3;
     constructor() ERC20("HearVerse Token", "HvT") {
         _mint(msg.sender, supply);
     }
