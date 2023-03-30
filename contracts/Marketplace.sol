@@ -13,6 +13,7 @@ error NoZeroPrice();
 error NotOwner();
 error NotActived();
 error InvalidParam();
+error NotWhitelisted();
 error InvalidAmount();
 
 struct Listing {
@@ -29,7 +30,7 @@ struct Listing {
 contract Marketplace is ReentrancyGuard, Ownable, Pausable {
   using SafeERC20 for IERC20;
 
-  uint public constant DECIMAL_FACTOR = 100_00;
+  uint256 public constant DECIMAL_FACTOR = 100_00; // change from uint to uint256
   uint256 public listingCount;
   uint256 public activeListingCount;
   uint256 private fee;
@@ -39,7 +40,7 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
   mapping (uint256 => Listing) public listings;
 
   /// @notice Event Listed
-  event ItemListed(
+  event ItemListed( 
     address nftAddress,
     uint256 listingId,
     uint256 tokenId,
@@ -90,9 +91,8 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
   {
     if (price == 0) revert NoZeroPrice();
     if (nftAddress == address(0)) revert NoZeroAddress();
-
-    uint256 listingId = listingCount;
-    listings[listingId] = Listing({
+//remove unneccesary line : uint256 listingId = listingCount;
+    listings[listingCount] = Listing({
       owner: _msgSender(),
       isActive: true,
       nftAddress: nftAddress,
@@ -116,7 +116,7 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
   /// @param listingId NFT Listing Id.
   function removeListing(uint256 listingId) public nonReentrant
   {
-    Listing storage listing = listings[listingId];
+    Listing memory listing = listings[listingId]; // change to memory
     if (listing.owner != _msgSender()) revert NotOwner();
     if (!listing.isActive) revert NotActived();
     listing.isActive = false;
@@ -139,27 +139,27 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
 
     listings[listingId].isActive = false;
     IERC20 payTokenAddress = listings[listingId].tokenAddress;
-    uint listedPrice = listings[listingId].price;
+    uint256 listedPrice = listings[listingId].price; // change from uint to uint256
     uint256 buyingFee = (fee * listedPrice / DECIMAL_FACTOR);
 
     if (address(payTokenAddress) == address(0)) {
       if (msg.value != listedPrice) revert InvalidAmount();
       if (buyingFee > 0) {
         (bool sent, ) = payable(treasury).call{value: buyingFee}("");
-        require(sent, "Failed to send Ether to treasury1");
+        require(sent, "Failed to send Ether to treasury1"); // is it possible to change require to revert
       }
       (bool sent, ) = payable(listings[listingId].owner).call{value: listedPrice - buyingFee}("");
-      require(sent, "Failed to send Ether");
+      require(sent, "Failed to send Ether"); // is it possible to change require to revert
     } else {
       if (msg.value != 0) revert InvalidAmount();
       if (buyingFee > 0) {
-        payTokenAddress.safeTransferFrom(
+        payTokenAddress.safeTransferFrom( 
           _msgSender(),
           treasury,
           buyingFee
         );
       }
-      payTokenAddress.safeTransferFrom(
+      payTokenAddress.safeTransferFrom( 
         _msgSender(),
         listings[listingId].owner,
         listedPrice - buyingFee
@@ -212,4 +212,3 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
     }
   }
 }
-
