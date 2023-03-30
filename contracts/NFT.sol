@@ -17,7 +17,7 @@ contract NFT is
     Pausable,
     AccessControl
 {
-    using Counters for Counters.Counter;
+    using Counters for Counters.Counter; 
 
     /// @dev Variable Attributes
     /// @notice These attributes would be nice to have on-chain because they affect the value of NFT and they are persistent when NFT changes hands.
@@ -40,7 +40,7 @@ contract NFT is
     Counters.Counter public _tokenIdCounter;
     mapping(uint256 => bytes32) public hashValue;
     mapping(uint256 => VariableAttributes) public attributes;
-    mapping(uint256 => string) private realTokenURI;
+    mapping(uint256 => bytes32) private realTokenURI; //change to bytes32
 
     modifier hasGameRole() {
         require(
@@ -67,9 +67,9 @@ contract NFT is
     /// @dev The caller must have the `MINTER_ROLE`.
     function safeMint(
         address _to,
-        string[] calldata _uri,
-        bytes32[] calldata _hash,
-        string[] calldata _realUri
+        string[] memory _uri, //change to memory
+        bytes32[] memory _hash, // change to memory
+        string[] memory _realUri // change to memory from calldata
     ) external override onlyRole(MINTER_ROLE) {
         require(_to != address(0), "To address can't be zero");
         require(_uri.length == _hash.length, "Invalid params");
@@ -82,9 +82,9 @@ contract NFT is
 
     function safeMintReplicator(
         address _to,
-        string calldata _uri,
+        string memory _uri, // change to memory
         bytes32 _hash,
-        string calldata _realUri
+        string memory _realUri // change to memory
     ) external override onlyRole(REPLICATOR_ROLE) returns (uint256) {
         require(_to != address(0), "To address can't be zero");
 
@@ -98,7 +98,7 @@ contract NFT is
         string memory _realUri
     ) internal returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
+        _tokenIdCounter.increment(); 
         hashValue[tokenId] = _hash;
         realTokenURI[tokenId] = _realUri;
         attributes[tokenId] = VariableAttributes({
@@ -243,10 +243,10 @@ contract NFT is
     /// @notice Unpauses all token transfers.
     /// @dev The caller must be the Owner (or have approval) of the Token.
     /// @param tokenId Token ID.
-    function _burn(uint256 tokenId)
+    function _burn(uint256 tokenId) 
         internal
         override(ERC721, ERC721URIStorage)
-    {
+    {//add view 
         require(_isApprovedOrOwner(_msgSender(), tokenId), "Not the owner");
         super._burn(tokenId);
     }
